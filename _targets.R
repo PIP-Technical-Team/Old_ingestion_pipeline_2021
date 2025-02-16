@@ -26,7 +26,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-py                 <- 2017  # PPP year
+py                 <- 2021  # PPP year
 branch             <- "main"
 branch             <- "DEV"
 release            <- "20240627"
@@ -41,10 +41,10 @@ max_year_lineup    <- 2023
 cts <- yrs <- NULL
 
 ## save data
-force_create_cache_file         <- TRUE
-save_pip_update_cache_inventory <- TRUE
-force_gd_2_synth                <- TRUE
-save_mp_cache                   <- TRUE
+force_create_cache_file         <- FALSE
+save_pip_update_cache_inventory <- FALSE
+force_gd_2_synth                <- FALSE
+save_mp_cache                   <- FALSE
 
 
 base_dir <- fs::path("e:/PovcalNet/01.personal/wb384996/PIP/pip_ingestion_pipeline")
@@ -53,16 +53,16 @@ base_dir <- fs::path("e:/PovcalNet/01.personal/wb384996/PIP/pip_ingestion_pipeli
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Load packages
-withr::with_dir(new = base_dir, 
+withr::with_dir(new = base_dir,
                 code = {
                   # source("./_packages.R")
-                  
+
                   # Load R files
-                  purrr::walk(fs::dir_ls(path = "./R", 
+                  purrr::walk(fs::dir_ls(path = "./R",
                                          regexp = "\\.R$"), source)
-                  
+
                   # Read pipdm functions
-                  purrr::walk(fs::dir_ls(path = "./R/pipdm/R", 
+                  purrr::walk(fs::dir_ls(path = "./R/pipdm/R",
                                          regexp = "\\.R$"), source)
                 })
 
@@ -70,22 +70,24 @@ withr::with_dir(new = base_dir,
 ## Run common R code   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-base_dir |> 
-  fs::path("_common.R") |> 
+base_dir |>
+  fs::path("_common.R") |>
   source(echo = FALSE)
 
-base_dir |> 
-  fs::path("_cache_loading_saving.R") |> 
+# debugonce(from_gd_2_synth)
+# debugonce(find_new_svy_data)
+base_dir |>
+  fs::path("_cache_loading_saving.R") |>
   source(echo = FALSE)
-  
+
 
 
 ## Set targets options   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Check that the correct _targets store is used 
+# Check that the correct _targets store is used
 
 if (!identical(fs::path(tar_config_get('store')),
-               fs::path(gls$PIP_PIPE_DIR, 'pc_data/_targets2017'))) {
+               fs::path(gls$PIP_PIPE_DIR, 'pc_data/_targets2021'))) {
   stop('The store specified in _targets.yaml doesn\'t match with the pipeline directory')
 }
 
@@ -97,29 +99,29 @@ if (!identical(fs::path(tar_config_get('store')),
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 list(
-  
+
   ## Mean estimates ------------
-  
+
   ### LCU survey means -------
   # tar_target(cache, cache_o, iteration = "list"),
-  
+
   ### Fetch GD survey means and convert them to daily values ----
   tar_target(
-    gd_means, 
-    get_groupdata_means(cache_inventory = cache_inventory, 
-                        gdm            = dl_aux$gdm), 
+    gd_means,
+    get_groupdata_means(cache_inventory = cache_inventory,
+                        gdm            = dl_aux$gdm),
     iteration = "list"
   ),
-  
+
   ### LCU survey mean list ----
-  
+
   tar_target(
     svy_mean_lcu,
     mp_svy_mean_lcu(cache, gd_means),
     cue = tar_cue(mode = "always")
   ),
-  
-  
+
+
   ### LCU table ------
   tar_target(
     svy_mean_lcu_table,
@@ -128,19 +130,19 @@ list(
       pop_table = dl_aux$pop,
       pfw_table = dl_aux$pfw)
   ),
-  
-  
-  
-  ### Deflated survey mean (DSM) table ---- 
-  
+
+
+
+  ### Deflated survey mean (DSM) table ----
+
   tar_target(svy_mean_ppp_table,
              db_create_dsm_table(
                lcu_table = svy_mean_lcu_table,
                cpi_table = dl_aux$cpi,
                ppp_table = dl_aux$ppp)),
-  
+
   ### Reference year Mean table ------
-  
+
   # tar_target(dt_old_ref_mean_pred,
   #            db_create_ref_year_table(
   #              dsm_table = svy_mean_ppp_table,
@@ -150,68 +152,68 @@ list(
   #              ref_years = gls$PIP_REF_YEARS,
   #              pip_years = gls$PIP_YEARS,
   #              region_code = 'pcn_region_code')),
-  
-  tar_target(dt_ref_mean_pred, 
-             refy_mean_inc_group(dsm    = svy_mean_ppp_table, 
-                                 gls    = gls, 
-                                 dl_aux = dl_aux, 
+
+  tar_target(dt_ref_mean_pred,
+             refy_mean_inc_group(dsm    = svy_mean_ppp_table,
+                                 gls    = gls,
+                                 dl_aux = dl_aux,
                                  pinv   = pipeline_inventory)),
-  # tar_target(dt_ref_mean_pred, 
-  #            get_ref_mean_pred(old    = dt_old_ref_mean_pred, 
+  # tar_target(dt_ref_mean_pred,
+  #            get_ref_mean_pred(old    = dt_old_ref_mean_pred,
   #                              new    = dt_refy_mean_inc_group)),
-  
-  ## Distributional stats ---- 
-  
+
+  ## Distributional stats ----
+
   ### Lorenz curves (for microdata) ----
   tar_target(
     lorenz,
     mp_lorenz(cache)
   ),
-  
- 
+
+
   ### Dist statistics list ------
-  
+
   tar_target(dl_dist_stats,
              mp_dl_dist_stats(dt         = cache,
                               mean_table = svy_mean_ppp_table,
                               pop_table  = dl_aux$pop,
-                              cache_id   = cache_ids, 
+                              cache_id   = cache_ids,
                               ppp_year   = py)
   ),
-  
+
   ### Dist stat table ------
-  
+
   # Covert dist stat list to table
   tar_target(dt_dist_stats,
              db_create_dist_table(
                dl        = dl_dist_stats,
-               dsm_table = svy_mean_ppp_table, 
+               dsm_table = svy_mean_ppp_table,
                crr_inv   = cache_inventory)
   ),
-  
+
   ## Output tables --------
-  
+
   ### Reference Year stimations tables ----
-  
+
   tar_target(dt_prod_ref_estimation,
              db_create_ref_estimation_table(
-               ref_year_table = dt_ref_mean_pred, 
+               ref_year_table = dt_ref_mean_pred,
                dist_table     = dt_dist_stats)
   ),
-  
+
   ### Survey Year stimations tables ----
-  
+
   tar_target(dt_prod_svy_estimation,
              db_create_svy_estimation_table(
-               dsm_table = svy_mean_ppp_table, 
+               dsm_table = svy_mean_ppp_table,
                dist_table = dt_dist_stats,
                gdp_table = dl_aux$gdp,
                pce_table = dl_aux$pce)
   ),
-  
- 
+
+
   ## Coverage and censoring table -------
-  
+
   ### coverage table by region ----
   tar_target(
     dl_coverage,
@@ -219,17 +221,17 @@ list(
       ref_year_table        = dt_ref_mean_pred,
       pop_table             = dl_aux$pop,
       cl_table              = dl_aux$country_list,
-      incgrp_table          = dl_aux$income_groups, 
+      incgrp_table          = dl_aux$income_groups,
       ref_years             = gls$PIP_REF_YEARS,
       urban_rural_countries = c("ARG", "CHN", "IND", "SUR"),
       digits                = 2,
       gls                   = gls
     )
   ),
-  
-  
+
+
   ### Censoring table -------
-  
+
   # Create censoring list
   tar_target(
     dl_censored,
@@ -239,28 +241,28 @@ list(
       coverage_threshold = 50
     )
   ),
-  
+
   ### Regional population table ----
-  
+
   tar_target(
     dt_pop_region,
     db_create_reg_pop_table(
       pop_table   = dl_aux$pop,
-      cl_table    = dl_aux$country_list, 
+      cl_table    = dl_aux$country_list,
       region_code = 'pcn_region_code',
       pip_years   = gls$PIP_YEARS)
   ),
-  
+
   ### Decomposition table ----
-  
+
   tar_target(
     dt_decomposition,
     db_create_decomposition_table(
       dsm_table = svy_mean_ppp_table)
   ),
-  
+
   ##  Clean AUX data ------
-  
+
   # Clean and transform the AUX tables to the format
   # used on the PIP webpage.
   tar_target(all_aux,
@@ -268,30 +270,30 @@ list(
                   dl_aux$ppp, dl_aux$pce),
              iteration = "list"
   ),
-  
+
   tar_target(aux_names,
              c("cpi", "gdp", "pop", "ppp", "pce"),
              iteration = "list"
   ),
-  
+
   tar_target(
     aux_clean,
     db_clean_aux(all_aux, aux_names, pip_years = gls$PIP_YEARS),
-    pattern = map(all_aux, aux_names), 
+    pattern = map(all_aux, aux_names),
     iteration = "list"
   ),
-  
+
   # Create Framework data
   tar_target(
     dt_framework,
     create_framework(dl_aux$pfw)
   ),
-  
+
   #~~~~~~~~~~~~~~~~~~~~~~
-  ## Save data ---- 
-  
+  ## Save data ----
+
   ### survey data ------
-  
+
   tar_target(
     survey_files,
     mp_survey_files(
@@ -301,9 +303,9 @@ list(
       cols        = c('welfare', 'weight', 'area'),
       compress    = gls$FST_COMP_LVL)
   ),
-  
+
   ### Basic AUX data ----
-  
+
   tar_target(aux_out_files,
              aux_out_files_fun(gls$OUT_AUX_DIR_PC, aux_names)
   ),
@@ -313,11 +315,11 @@ list(
                             compress = gls$FST_COMP_LVL),
              pattern   = map(aux_clean, aux_out_files),
              iteration = "list"),
-  
+
   tar_files(aux_out_dir, aux_out_files),
-  
+
   ### Additional AUX files ----
-  
+
   #### Countries -----------
   tar_target(
     countries_out,
@@ -328,7 +330,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Countries with missing data ------------
   tar_target(
     missing_data_out,
@@ -339,7 +341,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Country List ---------
   tar_target(
     country_list_out,
@@ -350,7 +352,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Regions -----------
   tar_target(
     regions_out,
@@ -361,7 +363,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Country profiles  ------------
   tar_target(
     country_profiles_out,
@@ -372,7 +374,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Poverty lines ---------
   tar_target(
     poverty_lines_out,
@@ -383,7 +385,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   tar_target(
     national_poverty_lines_out,
     save_aux_data(
@@ -393,7 +395,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Survey metadata (for Data Sources page) --------
   tar_target(
     survey_metadata_out,
@@ -404,7 +406,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Indicators ----------
   tar_target(
     indicators_out,
@@ -415,10 +417,10 @@ list(
     ),
     format = 'file',
   ),
-  
-  
+
+
   ### Coverage files ----
-  
+
   #### Regional population ---------
   tar_target(
     pop_region_out,
@@ -429,7 +431,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Regional coverage  ----------
   tar_target(
     region_year_coverage_out,
@@ -440,7 +442,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Income group coverage ---------
   tar_target(
     incomeGroup_year_coverage_out,
@@ -451,7 +453,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Country year coverage --------
   tar_target(
     country_year_coverage_out,
@@ -460,7 +462,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "country_coverage.fst"),
       compress = TRUE)
   ),
-  
+
   ### Censored  -----
   tar_target(
     censored_out,
@@ -471,8 +473,8 @@ list(
     ),
     format = 'file',
   ),
-  
-  
+
+
   ### Decomposition master --------
   tar_target(
     decomposition_out,
@@ -483,7 +485,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   #### Framework data --------------
   tar_target(
     framework_out,
@@ -494,7 +496,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   ### Dictionary -------------
   tar_target(
     dictionary_out,
@@ -505,7 +507,7 @@ list(
     ),
     format = 'file',
   ),
-  
+
   ### SPL  --------------
   # tar_target(
   #   spl_out,
@@ -516,41 +518,41 @@ list(
   #   ),
   #   format = 'file',
   # ),
-  
+
   ### Estimation tables -------
-  
+
   tar_target(
     prod_ref_estimation_file,
-    format = 'file', 
-    save_estimations(dt       = dt_prod_ref_estimation, 
-                     dir      = gls$OUT_EST_DIR_PC, 
-                     name     = "prod_ref_estimation", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = dt_prod_ref_estimation,
+                     dir      = gls$OUT_EST_DIR_PC,
+                     name     = "prod_ref_estimation",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   tar_target(
     prod_svy_estimation_file,
-    format = 'file', 
-    save_estimations(dt       = dt_prod_svy_estimation, 
-                     dir      = gls$OUT_EST_DIR_PC, 
-                     name     = "prod_svy_estimation", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = dt_prod_svy_estimation,
+                     dir      = gls$OUT_EST_DIR_PC,
+                     name     = "prod_svy_estimation",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   # tar_target(
   #   lineup_median_file,
-  #   format = 'file', 
-  #   save_estimations(dt       = dt_lineup_median, 
-  #                    dir      = gls$OUT_EST_DIR_PC, 
-  #                    name     = "lineup_median", 
-  #                    time     = gls$TIME, 
+  #   format = 'file',
+  #   save_estimations(dt       = dt_lineup_median,
+  #                    dir      = gls$OUT_EST_DIR_PC,
+  #                    name     = "lineup_median",
+  #                    time     = gls$TIME,
   #                    compress = gls$FST_COMP_LVL)
   # ),
-  
+
   ###  Lorenz list ----
-  
+
   tar_target(
     lorenz_out,
     save_aux_data(
@@ -560,98 +562,98 @@ list(
     ),
     format = 'file',
   ),
-  
+
   ### Dist stats table ----
-  
+
   tar_target(
     dist_file,
     format = 'file',
-    save_estimations(dt       = dt_dist_stats, 
-                     dir      = gls$OUT_EST_DIR_PC, 
-                     name     = "dist_stats", 
-                     time     = gls$TIME, 
+    save_estimations(dt       = dt_dist_stats,
+                     dir      = gls$OUT_EST_DIR_PC,
+                     name     = "dist_stats",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   ### Survey means table ----
-  
+
   tar_target(
     survey_mean_file,
-    format = 'file', 
-    save_estimations(dt       = svy_mean_ppp_table, 
-                     dir      = gls$OUT_EST_DIR_PC, 
-                     name     = "survey_means", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = svy_mean_ppp_table,
+                     dir      = gls$OUT_EST_DIR_PC,
+                     name     = "survey_means",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   tar_target(
     survey_mean_file_aux,
-    format = 'file', 
-    save_estimations(dt       = svy_mean_ppp_table, 
-                     dir      = gls$OUT_AUX_DIR_PC, 
-                     name     = "survey_means", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = svy_mean_ppp_table,
+                     dir      = gls$OUT_AUX_DIR_PC,
+                     name     = "survey_means",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   tar_target(
     aux_versions_out,
-    format = 'file', 
-    save_estimations(dt       = aux_versions, 
-                     dir      = gls$OUT_AUX_DIR_PC, 
-                     name     = "aux_versions", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = aux_versions,
+                     dir      = gls$OUT_AUX_DIR_PC,
+                     name     = "aux_versions",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   ### Interpolated means table ----
-  
+
   tar_target(
     interpolated_means_file,
-    format = 'file', 
-    save_estimations(dt       = dt_ref_mean_pred, 
-                     dir      = gls$OUT_EST_DIR_PC, 
-                     name     = "interpolated_means", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = dt_ref_mean_pred,
+                     dir      = gls$OUT_EST_DIR_PC,
+                     name     = "interpolated_means",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   tar_target(
     interpolated_means_file_aux,
-    format = 'file', 
-    save_estimations(dt       = dt_ref_mean_pred, 
-                     dir      = gls$OUT_AUX_DIR_PC, 
-                     name     = "interpolated_means", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = dt_ref_mean_pred,
+                     dir      = gls$OUT_AUX_DIR_PC,
+                     name     = "interpolated_means",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
   ### Metaregion --------------
   tar_target(
     metaregion_file_aux,
-    format = 'file', 
-    save_estimations(dt       = dl_aux$metaregion, 
-                     dir      = gls$OUT_AUX_DIR_PC, 
-                     name     = "metaregion", 
-                     time     = gls$TIME, 
+    format = 'file',
+    save_estimations(dt       = dl_aux$metaregion,
+                     dir      = gls$OUT_AUX_DIR_PC,
+                     name     = "metaregion",
+                     time     = gls$TIME,
                      compress = gls$FST_COMP_LVL)
   ),
-  
+
   ### Data timestamp file ----
-  
+
   tar_target(
     data_timestamp_file,
-    # format = 'file', 
-    writeLines(as.character(Sys.time()), 
-               fs::path(gls$OUT_DIR_PC, 
-                        gls$vintage_dir, 
-                        "data_update_timestamp", 
+    # format = 'file',
+    writeLines(as.character(Sys.time()),
+               fs::path(gls$OUT_DIR_PC,
+                        gls$vintage_dir,
+                        "data_update_timestamp",
                         ext = "txt"))
-  ), 
-  
+  ),
+
   ## Convert AUX files  to qs ---------
   tar_target(
-    aux_qs_out, 
+    aux_qs_out,
     convert_to_qs(dir = gls$OUT_AUX_DIR_PC),
     cue = tar_cue(mode = "always")
   )
