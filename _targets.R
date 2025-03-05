@@ -34,7 +34,7 @@ release            <- "20250401"
 identity           <- "INT"
 identity           <- "PROD"
 max_year_country   <- 2023
-max_year_aggregate <- 2024
+max_year_aggregate <- 2025
 max_year_lineup    <- 2023
 
 ## filter creation of synth data
@@ -223,7 +223,7 @@ list(
       cl_table              = dl_aux$country_list,
       incgrp_table          = dl_aux$income_groups,
       ref_years             = gls$PIP_REF_YEARS,
-      urban_rural_countries = c("ARG", "CHN", "IND", "SUR"),
+      urban_rural_countries = c("ARG", "CHN", "SUR"),
       digits                = 2,
       gls                   = gls
     )

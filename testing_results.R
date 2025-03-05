@@ -15,12 +15,15 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #                   Load Libraries   ---------
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-library(fastverse)
-library(ggplot2)
 # pak::pak("PIP-technical-team/pipapi@DEV")
 # pak::pak("PIP-technical-team/wbpip@DEV")
 # pak::pak("PIP-technical-team/pipapi@PROD")
+
+library(fastverse)
+library(ggplot2)
+library(pipapi)
+options(pipapi.query_live_data = TRUE)
+getOption("pipapi.query_live_data")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #                   Subfunctions   ---------
@@ -41,7 +44,7 @@ data_pipeline <-  fs::path("//w1wbgencifs01/pip/pip_ingestion_pipeline/pc_data/o
 
 data_pipeline <-  fs::path("e:/PIP/pipapi_data/")
 
-lkups <- pipapi::create_versioned_lkups(
+lkups <- create_versioned_lkups(
   data_pipeline,
   # vintage_pattern = "(20240627|20240429)_2017_01_02"
   vintage_pattern = "20250401"
@@ -56,18 +59,21 @@ lkup <- lkups$versions_paths$`20250401_2021_01_02_PROD`
 ## survey data -----------
 
 ctr <- "all"
-pl <-3
+pl <- 3
 
 
-pip1_cl   <- pipr::get_stats(povline = pl)
-setDT(pip1_cl)
-
-setorderv(pip1_cl,  c("country_code", "reporting_level", "year"))
+# pip1_cl   <- pipr::get_stats(povline = pl)
+# setDT(pip1_cl)
+#
+# setorderv(pip1_cl,  c("country_code", "reporting_level", "year"))
 
 pip2_cl   <- pipapi::pip(country = ctr,
                      lkup = lkup,
                      povline = pl)
+
+
 setnames(pip2_cl, "reporting_year", "year")
+
 setorderv(pip2_cl,  c("country_code", "year", "reporting_level"))
 
 
