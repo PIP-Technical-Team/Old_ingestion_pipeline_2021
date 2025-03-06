@@ -250,7 +250,7 @@ list(
       pop_table   = dl_aux$pop,
       cl_table    = dl_aux$country_list,
       region_code = 'pcn_region_code',
-      pip_years   = gls$PIP_YEARS)
+      pip_years   = gls$PIP_REF_YEARS)
   ),
 
   ### Decomposition table ----
