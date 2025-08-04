@@ -1,3 +1,104 @@
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Install packages ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# remotes::install_github("PIP-Technical-Team/pipload@dev",
+#                         dependencies = FALSE)
+
+# pak::pak("PIP-Technical-Team/wbpip@DEV", ask = FALSE)
+# pak::pak("PIP-Technical-Team/wbpip@add_spl_to_dist_functions", ask = FALSE)
+# pak::pak("PIP-Technical-Team/pipfun@ongoing", ask = FALSE)
+# pak::pak("PIP-Technical-Team/pipload@new_pipeline", ask = FALSE)
+# pak::pak("randrescastaneda/joyn@DEV", ask = FALSE)
+# pak::pak("randrescastaneda/joyn@upload_values_fix", ask = FALSE)
+# pak::pak("PIP-Technical-Team/pipload@ongoing", ask = FALSE)
+
+# remotes::install_github("PIP-Technical-Team/wbpip",
+#                        dependencies = FALSE)
+
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Step 1 ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+## Select Defaults ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+py                 <- 2021  # PPP year
+branch             <- "main"
+branch             <- "DEV"
+release            <- "20240627"
+release            <- "20250401"
+identity           <- "INT"
+identity           <- "PROD"
+max_year_country   <- 2023
+max_year_aggregate <- 2025
+max_year_lineup    <- 2023
+
+## filter creation of synth data
+cts <- yrs <- NULL
+
+## save data
+force_create_cache_file         <- FALSE
+save_pip_update_cache_inventory <- FALSE
+force_gd_2_synth                <- FALSE
+save_mp_cache                   <- FALSE
+
+
+base_dir <- fs::path("e:/PovcalNet/01.personal/wb384996/PIP/pip_ingestion_pipeline")
+
+## Start up ----
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Load packages
+withr::with_dir(new = base_dir,
+                code = {
+                  # source("./_packages.R")
+
+                  # Load R files
+                  purrr::walk(fs::dir_ls(path = "./R",
+                                         regexp = "\\.R$"), source)
+
+                  # Read pipdm functions
+                  purrr::walk(fs::dir_ls(path = "./R/pipdm/R",
+                                         regexp = "\\.R$"), source)
+                })
+
+
+## Run common R code   ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+base_dir |>
+  fs::path("_common.R") |>
+  source(echo = FALSE)
+
+# debugonce(from_gd_2_synth)
+# debugonce(find_new_svy_data)
+base_dir |>
+  fs::path("_cache_loading_saving.R") |>
+  source(echo = FALSE)
+
+
+
+## Set targets options   ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Check that the correct _targets store is used
+
+if (!identical(fs::path(tar_config_get('store')),
+               fs::path(gls$PIP_PIPE_DIR, 'pc_data/_targets2021'))) {
+  stop('The store specified in _targets.yaml doesn\'t match with the pipeline directory')
+}
+
+# filter for testing --------
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Step 2: Run pipeline   ---------
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
 gd_means <-
 get_groupdata_means(cache_inventory = cache_inventory, gdm = dl_aux$gdm)

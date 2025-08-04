@@ -1,9 +1,23 @@
 convert_targets_to_script <- function(targets_file, output_file) {
+
   # Read the file as lines
   lines <- readLines(targets_file)
-  # Find the line where the list( starts
-  list_start <- grep("^\\s*list\\s*\\(", lines)
-  if (length(list_start) == 0) stop("No list( found in file.")
+  # Find all lines that start with list(
+  list_candidates <- grep("^\\s*list\\s*\\(", lines)
+  if (length(list_candidates) == 0) stop("No list( found in file.")
+
+  # Heuristically pick the list( that contains tar_target calls inside
+  list_start <- NA
+  for (idx in list_candidates) {
+    # Look ahead a few lines to see if tar_target appears soon after
+    lookahead <- lines[seq(idx, min(idx + 10, length(lines)))]
+    if (any(grepl("tar_target\\s*\\(", lookahead))) {
+      list_start <- idx
+      break
+    }
+  }
+  if (is.na(list_start)) stop("No list( containing tar_target() found in file.")
+
   # Everything before the list( is the heading
   heading <- lines[seq_len(list_start - 1)]
 
@@ -32,10 +46,6 @@ convert_targets_to_script <- function(targets_file, output_file) {
   # Write heading and assignments to output file
   writeLines(c(heading, "", assignments), output_file)
 }
-
-
-
-
 
 
 # Example usage:
