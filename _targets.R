@@ -42,7 +42,7 @@ cts <- yrs <- NULL
 
 ## save data
 force_create_cache_file         <- FALSE
-save_pip_update_cache_inventory <- TRUE
+save_pip_update_cache_inventory <- FALSE
 force_gd_2_synth                <- FALSE
 save_mp_cache                   <- FALSE
 

@@ -52,7 +52,7 @@ lkups <- create_versioned_lkups(
   )
 
 lkup <- lkups$versions_paths[[lkups$latest_release]]
-lkup <- lkups$versions_paths$`20250401_2021_01_02_PROD`
+lkup <- lkups$versions_paths$`20250401_2017_01_02_PROD`
 
 # Compare two different version -----------
 
@@ -61,6 +61,8 @@ lkup <- lkups$versions_paths$`20250401_2021_01_02_PROD`
 ctr <- "all"
 pl <- 3
 
+ctr <- "IND"
+pl <- 2.15
 
 # pip1_cl   <- pipr::get_stats(povline = pl)
 # setDT(pip1_cl)
@@ -69,8 +71,10 @@ pl <- 3
 
 pip2_cl   <- pipapi::pip(country = ctr,
                      lkup = lkup,
-                     povline = pl)
+                     povline = pl,
+                     year = c(1993, 2004, 2009))
 
+pip2_cl[, .(reporting_year, headcount, cpi, ppp)]
 
 setnames(pip2_cl, "reporting_year", "year")
 
