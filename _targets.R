@@ -523,22 +523,22 @@ list(
 
   tar_target(
     prod_ref_estimation_file,
-    format = 'file',
     save_estimations(dt       = dt_prod_ref_estimation,
                      dir      = gls$OUT_EST_DIR_PC,
                      name     = "prod_ref_estimation",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file',
   ),
 
   tar_target(
     prod_svy_estimation_file,
-    format = 'file',
     save_estimations(dt       = dt_prod_svy_estimation,
                      dir      = gls$OUT_EST_DIR_PC,
                      name     = "prod_svy_estimation",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file',
   ),
 
   # tar_target(
@@ -560,83 +560,83 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "lorenz.rds"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   ### Dist stats table ----
 
   tar_target(
     dist_file,
-    format = 'file',
     save_estimations(dt       = dt_dist_stats,
                      dir      = gls$OUT_EST_DIR_PC,
                      name     = "dist_stats",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   ### Survey means table ----
 
   tar_target(
     survey_mean_file,
-    format = 'file',
     save_estimations(dt       = svy_mean_ppp_table,
                      dir      = gls$OUT_EST_DIR_PC,
                      name     = "survey_means",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   tar_target(
     survey_mean_file_aux,
-    format = 'file',
     save_estimations(dt       = svy_mean_ppp_table,
                      dir      = gls$OUT_AUX_DIR_PC,
                      name     = "survey_means",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   tar_target(
     aux_versions_out,
-    format = 'file',
     save_estimations(dt       = aux_versions,
                      dir      = gls$OUT_AUX_DIR_PC,
                      name     = "aux_versions",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   ### Interpolated means table ----
 
   tar_target(
     interpolated_means_file,
-    format = 'file',
     save_estimations(dt       = dt_ref_mean_pred,
                      dir      = gls$OUT_EST_DIR_PC,
                      name     = "interpolated_means",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   tar_target(
     interpolated_means_file_aux,
-    format = 'file',
     save_estimations(dt       = dt_ref_mean_pred,
                      dir      = gls$OUT_AUX_DIR_PC,
                      name     = "interpolated_means",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
   ### Metaregion --------------
   tar_target(
     metaregion_file_aux,
-    format = 'file',
     save_estimations(dt       = dl_aux$metaregion,
                      dir      = gls$OUT_AUX_DIR_PC,
                      name     = "metaregion",
                      time     = gls$TIME,
-                     compress = gls$FST_COMP_LVL)
+                     compress = gls$FST_COMP_LVL),
+    format = 'file'
   ),
 
   ### Data timestamp file ----
