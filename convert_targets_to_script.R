@@ -1,22 +1,19 @@
-
-
-
 convert_targets_to_script <- function(targets_file, output_file) {
+  # Read the file as lines
+  lines <- readLines(targets_file)
+  # Find the line where the list( starts
+  list_start <- grep("^\\s*list\\s*\\(", lines)
+  if (length(list_start) == 0) stop("No list( found in file.")
+  # Everything before the list( is the heading
+  heading <- lines[seq_len(list_start - 1)]
+
   # Parse the file as R expressions
   wscript <- parse(targets_file)
   l_script <- length(wscript)
-  exprs <- as.list(exprs[[l_script]])
+  exprs <- as.list(wscript[[l_script]])
   nexpr <- length(exprs)
 
   assignments <- vector("character", nexpr)
-
-
-  heading <- deparse(wscript[1:(l_script-1)])
-
-
-
-
-
 
   for (i in seq_along(exprs)) {
     expr <- exprs[[i]]
@@ -28,13 +25,18 @@ convert_targets_to_script <- function(targets_file, output_file) {
       code <- paste(deparse(code_expr), collapse = "\n")
       # Format as assignment
       assignment <- paste0(target_name, " <-\n", code, "\n")
-      # assignments <- c(assignments, assignment)
       assignments[i] <- assignment
     }
   }
 
-  writeLines(assignments, output_file)
+  # Write heading and assignments to output file
+  writeLines(c(heading, "", assignments), output_file)
 }
+
+
+
+
+
 
 # Example usage:
 
