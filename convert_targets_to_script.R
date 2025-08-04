@@ -29,5 +29,6 @@ convert_targets_to_script <- function(targets_file, output_file) {
 }
 
 # Example usage:
-targets_file <- "_targets.R"
-# convert_targets_to_script("targets_script.R", "sequential_script.R")
+
+convert_targets_to_script("_targets.R", "sequential_script.R")
+
