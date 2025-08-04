@@ -1,14 +1,22 @@
 
 
 
-
 convert_targets_to_script <- function(targets_file, output_file) {
   # Parse the file as R expressions
-  exprs <- parse(targets_file)
-  exprs <- as.list(exprs[[length(exprs)]])
+  wscript <- parse(targets_file)
+  l_script <- length(wscript)
+  exprs <- as.list(exprs[[l_script]])
   nexpr <- length(exprs)
 
   assignments <- vector("character", nexpr)
+
+
+  heading <- deparse(wscript[1:(l_script-1)])
+
+
+
+
+
 
   for (i in seq_along(exprs)) {
     expr <- exprs[[i]]
