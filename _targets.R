@@ -29,8 +29,8 @@
 py                 <- 2021  # PPP year
 branch             <- "main"
 branch             <- "DEV"
-release            <- "20240627"
 release            <- "20250401"
+release            <- "20250930"
 identity           <- "INT"
 identity           <- "PROD"
 max_year_country   <- 2023
@@ -76,9 +76,13 @@ base_dir |>
 
 # debugonce(from_gd_2_synth)
 # debugonce(find_new_svy_data)
-base_dir |>
-  fs::path("_cache_loading_saving.R") |>
-  source(echo = FALSE)
+# base_dir |>
+#   fs::path("_cache_loading_saving.R") |>
+#   source(echo = FALSE)
+
+pipeline_inventory <-
+  pipeline_inventory[module  != "PC-GROUP"]
+
 
 
 
@@ -99,7 +103,39 @@ if (!identical(fs::path(tar_config_get('store')),
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 list(
+  # Create microdata cache files
+  tar_target(status_cache_files_creation,
+               create_cache_file(
+                 pipeline_inventory = pipeline_inventory,
+                 pip_data_dir       = gls$PIP_DATA_DIR,
+                 tool               = "PC",
+                 cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
+                 compress           = gls$FST_COMP_LVL,
+                 force              = force_create_cache_file,
+                 verbose            = TRUE,
+                 cpi_table          = dl_aux$cpi,
+                 ppp_table          = dl_aux$ppp,
+                 pfw_table          = dl_aux$pfw,
+                 pop_table          = dl_aux$pop)),
 
+  # Create synthetic cache files
+  tar_target(pipeline_inventory2,
+               from_gd_2_synth(dl_aux             = dl_aux,
+                               gls                = gls,
+                               pipeline_inventory = pipeline_inventory,
+                               force              = force_gd_2_synth,
+                               cts                = cts,
+                               yrs                = yrs)),
+  tar_target(cache_inventory,
+               pip_update_cache_inventory(
+                 pipeline_inventory = pipeline_inventory2,
+                 pip_data_dir       = gls$PIP_DATA_DIR,
+                 cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
+                 tool               = "PC",
+                 save               = save_pip_update_cache_inventory,
+                 load               = TRUE,
+                 verbose            = TRUE
+               ))
 
 )
 
