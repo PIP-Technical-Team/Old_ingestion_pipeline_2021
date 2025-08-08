@@ -328,7 +328,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "countries.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Countries with missing data ------------
@@ -339,7 +339,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "missing_data.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Country List ---------
@@ -350,7 +350,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "country_list.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Regions -----------
@@ -361,7 +361,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "regions.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Country profiles  ------------
@@ -372,7 +372,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "country_profiles.rds"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Poverty lines ---------
@@ -383,7 +383,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "poverty_lines.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   tar_target(
@@ -393,7 +393,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "national_poverty_lines.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Survey metadata (for Data Sources page) --------
@@ -404,7 +404,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "survey_metadata.rds"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Indicators ----------
@@ -415,7 +415,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "indicators.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
 
@@ -429,7 +429,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "pop_region.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Regional coverage  ----------
@@ -440,7 +440,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "region_coverage.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Income group coverage ---------
@@ -451,7 +451,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "incgrp_coverage.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Country year coverage --------
@@ -471,7 +471,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "censored.rds"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
 
@@ -483,7 +483,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "decomposition.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   #### Framework data --------------
@@ -494,7 +494,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "framework.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   ### Dictionary -------------
@@ -505,7 +505,7 @@ list(
       fs::path(gls$OUT_AUX_DIR_PC, "dictionary.fst"),
       compress = TRUE
     ),
-    format = 'file',
+    format = 'file'
   ),
 
   ### SPL  --------------
@@ -528,7 +528,7 @@ list(
                      name     = "prod_ref_estimation",
                      time     = gls$TIME,
                      compress = gls$FST_COMP_LVL),
-    format = 'file',
+    format = 'file'
   ),
 
   tar_target(
@@ -538,7 +538,7 @@ list(
                      name     = "prod_svy_estimation",
                      time     = gls$TIME,
                      compress = gls$FST_COMP_LVL),
-    format = 'file',
+    format = 'file'
   ),
 
   # tar_target(
