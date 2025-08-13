@@ -80,8 +80,8 @@ base_dir |>
 #   fs::path("_cache_loading_saving.R") |>
 #   source(echo = FALSE)
 
-pipeline_inventory <-
-  pipeline_inventory[module  != "PC-GROUP"]
+# pipeline_inventory <-
+#   pipeline_inventory[module  != "PC-GROUP"]
 
 
 
@@ -103,6 +103,39 @@ if (!identical(fs::path(tar_config_get('store')),
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 list(
+  # AUX data ------------------
+
+  tar_target(aux_tb,
+             prep_aux_data(maindir = gls$PIP_DATA_DIR,
+                           branch  = branch)),
+
+  # Load aux data
+  tar_target(dl_aux1,
+             load_aux_data(aux_tb),
+             cue = tar_cue(mode = "always") ),
+
+  # format data
+  tar_target(dl_aux,
+             format_aux_data(dl_aux1, py)),
+
+
+  # CACHE data ------------
+
+  # Load PIP inventory
+  tar_target(pip_inventory_file,
+             fs::path(gls$PIP_DATA_DIR, '_inventory/inventory.fst'),
+             format = "file"),
+
+  tar_target(pip_inventory,
+             load_pip_inventory(pip_inventory_file)),
+
+  # Load PIPELINE inventory file
+  tar_target(pipeline_inventory,
+               db_filter_inventory(dt        = pip_inventory,
+                                   pfw_table = dl_aux$pfw) |>
+               _[module  != "PC-GROUP"]),
+
+
   # Create microdata cache files
   tar_target(status_cache_files_creation,
                create_cache_file(
@@ -126,7 +159,7 @@ list(
                                force              = force_gd_2_synth,
                                cts                = cts,
                                yrs                = yrs)),
-  tar_target(cache_inventory,
+  tar_target(cache_inventory1,
                pip_update_cache_inventory(
                  pipeline_inventory = pipeline_inventory2,
                  pip_data_dir       = gls$PIP_DATA_DIR,
@@ -135,7 +168,38 @@ list(
                  save               = save_pip_update_cache_inventory,
                  load               = TRUE,
                  verbose            = TRUE
-               ))
+               )),
+
+  # cache IDs
+  tar_target(cache_ppp, gls$cache_ppp),
+
+  # filter cache inventory with PFW
+  tar_target(cache_inventory,
+             filter_cache_inventory(cache_inventory1, dl_aux)),
+
+
+  tar_target(cache_ids,
+             get_cache_id(cache_inventory)),
+  tar_files(cache_dir,
+             get_cache_files(cache_inventory) |>
+               setNames(cache_ids)),
+
+
+  # create cache global list
+  tar_target(cache_file,
+             create_cache(cache_dir = cache_dir,
+                          cache_ids = cache_ids,
+                          save = FALSE,
+                          gls = gls,
+                          cache_ppp = cache_ppp),
+             format = "file"),
+
+  # Load cache file
+  tar_target(cache,
+             load_cache(cache_file)),
+  tar_target(assert_cache_length,
+             tar_cancel(length(cache) == length(cache_dir)))
+
 
 )
 
