@@ -118,6 +118,8 @@ list(
   tar_target(dl_aux,
              format_aux_data(dl_aux1, py)),
 
+  tar_target(aux_versions,
+             get_aux_versions(dl_aux)),
 
   # CACHE data ------------
 
@@ -416,7 +418,7 @@ list(
              pattern   = map(aux_clean, aux_out_files),
              iteration = "list"),
 
-  tar_files(aux_out_dir, aux_out_files),
+  # tar_files(aux_out_dir, aux_out_files),
 
   ### Additional AUX files ----
 
