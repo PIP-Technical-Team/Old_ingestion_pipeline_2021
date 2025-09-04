@@ -140,19 +140,17 @@ list(
   # tar_target(dta_paths,
   #            as.character(pipeline_inventory$orig)),
 
-  tar_files_input(name = orig_dta_files,
-                  files =  dta_paths),
+  tar_files_input(orig_dta_files,
+                  dta_paths),
 
   tar_target(cache_id_in_inventory,
-             get_cache_id(pipeline_inventory),
-             iteration = "list"),
+             get_cache_id(pipeline_inventory)),
 
-  tar_target(delete_old_cache_id,
-             delete_old_cache_id(orig_dta_files,
+  tar_target(old_cache_id_deleted,
+               delete_old_cache_id(orig_dta_files,
                                  cache_id_in_inventory,
                                  gls),
-             pattern = map(orig_dta_files, cache_id_in_inventory),
-             iternation = "list"),
+             pattern = map(orig_dta_files, cache_id_in_inventory)),
 
 
   # Create microdata cache files
