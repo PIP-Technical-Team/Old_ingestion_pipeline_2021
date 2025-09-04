@@ -124,53 +124,70 @@ list(
   # CACHE data ------------
 
   # Load PIP inventory
-  tar_target(pip_inventory_file,
-             fs::path(gls$PIP_DATA_DIR, '_inventory/inventory.fst'),
-             format = "file"),
+  # tar_target(pip_inventory_file,
+  #            fs::path(gls$PIP_DATA_DIR, '_inventory/inventory.fst'),
+  #            format = "file"),
+  #
+  # tar_target(pip_inventory,
+  #            load_pip_inventory(pip_inventory_file)),
+  #
+  # # Load PIPELINE inventory file
+  # tar_target(pipeline_inventory,
+  #            db_filter_inventory(dt        = pip_inventory,
+  #                                pfw_table = dl_aux$pfw) |>
+  #              _[module  != "PC-GROUP"]),
+  #
+  # tar_target(dta_paths,
+  #            as.character(pipeline_inventory$orig)),
 
-  tar_target(pip_inventory,
-             load_pip_inventory(pip_inventory_file)),
+  tar_files_input(name = orig_dta_files,
+                  files =  dta_paths),
 
-  # Load PIPELINE inventory file
-  tar_target(pipeline_inventory,
-               db_filter_inventory(dt        = pip_inventory,
-                                   pfw_table = dl_aux$pfw) |>
-               _[module  != "PC-GROUP"]),
+  tar_target(cache_id_in_inventory,
+             get_cache_id(pipeline_inventory),
+             iteration = "list"),
+
+  tar_target(delete_old_cache_id,
+             delete_old_cache_id(orig_dta_files,
+                                 cache_id_in_inventory,
+                                 gls),
+             pattern = map(orig_dta_files, cache_id_in_inventory),
+             iternation = "list"),
 
 
   # Create microdata cache files
   tar_target(status_cache_files_creation,
-               create_cache_file(
-                 pipeline_inventory = pipeline_inventory,
-                 pip_data_dir       = gls$PIP_DATA_DIR,
-                 tool               = "PC",
-                 cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
-                 compress           = gls$FST_COMP_LVL,
-                 force              = force_create_cache_file,
-                 verbose            = TRUE,
-                 cpi_table          = dl_aux$cpi,
-                 ppp_table          = dl_aux$ppp,
-                 pfw_table          = dl_aux$pfw,
-                 pop_table          = dl_aux$pop)),
+             create_cache_file(
+               pipeline_inventory = pipeline_inventory,
+               pip_data_dir       = gls$PIP_DATA_DIR,
+               tool               = "PC",
+               cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
+               compress           = gls$FST_COMP_LVL,
+               force              = force_create_cache_file,
+               verbose            = TRUE,
+               cpi_table          = dl_aux$cpi,
+               ppp_table          = dl_aux$ppp,
+               pfw_table          = dl_aux$pfw,
+               pop_table          = dl_aux$pop)),
 
   # Create synthetic cache files
   tar_target(pipeline_inventory2,
-               from_gd_2_synth(dl_aux             = dl_aux,
-                               gls                = gls,
-                               pipeline_inventory = pipeline_inventory,
-                               force              = force_gd_2_synth,
-                               cts                = cts,
-                               yrs                = yrs)),
+             from_gd_2_synth(dl_aux             = dl_aux,
+                             gls                = gls,
+                             pipeline_inventory = pipeline_inventory,
+                             force              = force_gd_2_synth,
+                             cts                = cts,
+                             yrs                = yrs)),
   tar_target(cache_inventory1,
-               pip_update_cache_inventory(
-                 pipeline_inventory = pipeline_inventory2,
-                 pip_data_dir       = gls$PIP_DATA_DIR,
-                 cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
-                 tool               = "PC",
-                 save               = save_pip_update_cache_inventory,
-                 load               = TRUE,
-                 verbose            = TRUE
-               )),
+             pip_update_cache_inventory(
+               pipeline_inventory = pipeline_inventory2,
+               pip_data_dir       = gls$PIP_DATA_DIR,
+               cache_svy_dir      = gls$CACHE_SVY_DIR_PC,
+               tool               = "PC",
+               save               = save_pip_update_cache_inventory,
+               load               = TRUE,
+               verbose            = TRUE
+             )),
 
   # cache IDs
   tar_target(cache_ppp, gls$cache_ppp),
@@ -183,8 +200,8 @@ list(
   tar_target(cache_ids,
              get_cache_id(cache_inventory)),
   tar_files(cache_dir,
-             get_cache_files(cache_inventory) |>
-               setNames(cache_ids)),
+            get_cache_files(cache_inventory),
+            cue = tar_cue(mode = "always")),
 
 
   # create cache global list
@@ -197,8 +214,8 @@ list(
   # create cache global list inventory
   tar_target(global_cache_inv,
              update_global_cache_inv(cache_dir = cache_dir,
-                          gls = gls,
-                          cache_ppp = cache_ppp),
+                                     gls = gls,
+                                     cache_ppp = cache_ppp),
              format = "file"),
 
   # Load cache file
@@ -764,7 +781,6 @@ list(
     convert_to_qs(dir = gls$OUT_AUX_DIR_PC),
     cue = tar_cue(mode = "always")
   )
-
 
 )
 
