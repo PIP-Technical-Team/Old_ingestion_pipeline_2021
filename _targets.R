@@ -145,15 +145,15 @@ list(
                dir_path = fs::path(gls$CACHE_SVY_DIR_PC),
                fs_paths = as.character(pipeline_inventory$orig)),
              cue = tar_cue(mode = "always")
-             ),
+  ),
 
   # tar_files_input(orig_dta_files,
   #                 dta_paths),
 
   tar_target(old_cache_id_deleted,
-               delete_old_cache_id(fs_status = fs_status,
-                                   pipeline_inventory = pipeline_inventory,
-                                   gls)),
+             delete_old_cache_id(fs_status = fs_status,
+                                 pipeline_inventory = pipeline_inventory,
+                                 gls)),
 
 
   # Create microdata cache files
@@ -202,8 +202,7 @@ list(
   tar_target(cache_ids,
              get_cache_id(cache_inventory)),
   tar_files(cache_dir,
-            get_cache_files(cache_inventory),
-            cue = tar_cue(mode = "always")),
+            get_cache_files(cache_inventory)),
 
 
   # create cache global list
@@ -213,12 +212,6 @@ list(
                           cache_ppp = cache_ppp),
              format = "file"),
 
-  # create cache global list inventory
-  tar_target(global_cache_inv,
-             update_global_cache_inv(cache_dir = cache_dir,
-                                     gls = gls,
-                                     cache_ppp = cache_ppp),
-             format = "file"),
 
   # Load cache file
   tar_target(cache,
@@ -769,7 +762,7 @@ list(
   tar_target(run_time,
              as.character(Sys.time()),
              cue = tar_cue(mode = "always")
-             ),
+  ),
 
   tar_target(
     data_timestamp_file,
