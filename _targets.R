@@ -29,10 +29,9 @@
 py                 <- 2021  # PPP year
 branch             <- "main"
 branch             <- "DEV"
-release            <- "20250401"
 release            <- "20250930"
-identity           <- "INT"
-identity           <- "PROD"
+release            <- "20260324"
+identity           <- "PROD" # INT or DEV
 max_year_country   <- 2024
 max_year_aggregate <- 2025
 max_year_lineup    <- 2024
@@ -42,9 +41,9 @@ cts <- yrs <- NULL
 
 ## save data
 force_create_cache_file         <- FALSE
-save_pip_update_cache_inventory <- TRUE
+save_pip_update_cache_inventory <- FALSE
 force_gd_2_synth                <- FALSE
-save_mp_cache                   <- FALSE
+save_mp_cache                   <- FALSE 
 
 
 base_dir <- fs::path("e:/PovcalNet/01.personal/wb384996/PIP/pip_ingestion_pipeline")
@@ -220,7 +219,7 @@ list(
                           gls = gls,
                           cache_ppp = cache_ppp,
                           cache_status = cache_status,
-                          force = TRUE),
+                          force = save_mp_cache),
              format = "file"),
 
 
