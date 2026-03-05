@@ -28,7 +28,6 @@
 
 py                 <- 2021  # PPP year
 branch             <- "DEV"
-release            <- "20250930"
 release            <- "20260324"
 identity           <- "PROD" # INT or DEV
 max_year_country   <- 2024

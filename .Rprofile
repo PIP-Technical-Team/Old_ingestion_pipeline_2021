@@ -48,7 +48,9 @@ if (requireNamespace("pushoverr", quietly = TRUE)) {
     # Helper: run sync and return any error as a string (never throws)
     run_sync <- function() {
       tryCatch({
-        tar_load_globals()
+        # Load globals into the global env so gls and release are available
+        tar_load_globals(envir = globalenv())
+        gls <- get("gls", envir = globalenv())
 
         sync_status <- syncdr::compare_directories(
           left_path  = fs::path(gls$OUT_DIR_PC, gls$vintage_dir),
