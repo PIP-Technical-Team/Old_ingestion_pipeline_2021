@@ -27,7 +27,6 @@
 
 
 py                 <- 2021  # PPP year
-branch             <- "main"
 branch             <- "DEV"
 release            <- "20250930"
 release            <- "20260324"
@@ -43,7 +42,7 @@ cts <- yrs <- NULL
 force_create_cache_file         <- FALSE
 save_pip_update_cache_inventory <- FALSE
 force_gd_2_synth                <- FALSE
-save_mp_cache                   <- FALSE 
+save_mp_cache                   <- FALSE
 
 
 base_dir <- fs::path("e:/PovcalNet/01.personal/wb384996/PIP/pip_ingestion_pipeline")
