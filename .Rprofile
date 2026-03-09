@@ -123,8 +123,9 @@ if (requireNamespace("pushoverr", quietly = TRUE)) {
 
     ) # End of tryCatch
 
-    pushoverr::pushover(msg)
-    cli::cli_alert(msg)
+    msg_safe <- gsub("\\}", "}}", gsub("\\{", "{{", msg))
+    pushoverr::pushover(msg_safe)
+    cli::cli_alert("{msg}")
 
     return(invisible(TRUE))
   }

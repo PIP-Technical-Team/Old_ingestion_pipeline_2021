@@ -11,3 +11,7 @@ temp_development.R
 .github/instructions/
 .github/copilot-instructions.md
 
+# Compound GPID local config (user-specific, never commit)
+compound-gpid.local.md
+# Compound GPID knowledge base (local thinking artifacts, typically not committed)
+.cg-docs/
